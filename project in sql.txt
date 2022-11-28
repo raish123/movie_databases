@@ -1,0 +1,300 @@
+#-------project in sql----------------
+#create a database
+create database film_industry;
+#if i want to show all the databases in output we use this command
+show databases;
+#if i want to use this database then we using this command
+use film_industry;
+
+#creating a table of actor(parent table of movie_cast table) in film_industry database
+
+drop table actor;
+create table actor(
+act_id int primary key ,
+act_fname varchar(20),
+act_lname varchar(20),
+gender varchar(2)
+);
+
+#creating child class table(movie_cast) of actor and making relationship btn them
+#by using foreign key who is refering parent table primary key 
+
+drop table movie_cast;
+create table movie_cast(
+act_id int,
+constraint fk_act_id 
+foreign key(act_id) references actor(act_id),
+mov_id int,
+constraint fk_mov_id2
+foreign key(mov_id) references movie(mov_id),
+role varchar(30)
+);
+
+#creating a director table who is parent class table of movie_direction table ka
+drop table director;
+create table director(
+dir_id int primary key,
+dir_fname varchar(20),
+dir_lname varchar(20)
+);
+
+#creating a child class table movie_direction who is a child table of direction table
+drop table movie_direction;
+create table movie_direction(
+dir_id int,
+constraint fk_dir_id
+foreign key(dir_id) references director(dir_id),
+mov_id int,
+constraint fk_mov_id1
+foreign key(mov_id) references movie(mov_id)
+);
+
+#creating genres table who is parent class of movie_genres...
+#so we making relation btn table by using foreign key
+drop table genres;
+create table genres(
+gen_id int primary key,
+gen_title varchar(20)
+);
+
+#creating child class table of genres who is movie_genres
+#so we making relation btn table by using foreign key
+drop table movie_genres;
+create table movie_genres(
+mov_id int,
+constraint fk_mov_id3
+foreign key(mov_id) references movie(mov_id),
+gen_id int,
+constraint fk_gen_id
+foreign key(gen_id) references genres(gen_id)
+);
+
+#creating a reviewer table who is parent class of rating child class
+#so we making relation btn table by using foreign key
+drop table reviewers;
+create table reviewers(
+rev_id int primary key,
+rev_name varchar(30)
+);
+
+
+#creating a child class table of rating and making 
+#one to one relation btn by using foreign key
+drop table rating;
+create table rating(
+mov_id int,
+constraint fk_mov_id4
+foreign key(mov_id) references movie(mov_id),
+rev_id int,
+constraint fk_rev_id
+foreign key(rev_id) references reviewers(rev_id),
+rev_stars int,
+num_o_ratings int
+);
+
+#now creating a movie table who is a parent class table of movie_cast and movie_direction
+#and making the relation btn table by using foreign key
+
+create table movie(
+mov_id int primary key,
+mov_title varchar(50),
+mov_year int,
+mov_time int,
+mov_lang varchar(50),
+mov_dt_rel date,
+mov_rel_country varchar(10)
+);
+
+
+show tables;
+
+#if i want to see all the foreign key name and constraints it achiev by using below synatx
+select *  from information_schema.table_constraints
+where table_name in ('actor','director','genres','movie','movie_cast','movie_direction','movie_genres','rating','reviewers');
+
+#tomorrow i will insert the records in all the table then applying some 
+#queries and subqueries as well as join btn tables!
+
+insert into actor
+values(1,'salman','khan','m'),(2,'shahrukh','khan','m'),(3,'amir','khan','m'),
+(4,'alia','bhatt','f'),(5,'deepika','padukone','f');
+
+select * from actor;
+
+insert into director
+values(1,'karan','johar'),(2,'yash','chopra'),(3,'sanjay leela','bhansali'),
+(4,'rakesh','roshan'),(5,'farhan','akhtar');
+
+select * from director;
+
+alter table movie
+drop column mov_dt_rel;
+
+desc movie;
+
+insert into movie
+values(1,'ek tha tiger',2015,120,'hindi','india'),(2,'rab ne bana di jodi',2014,125,'hindi','india'),
+(3,'ram leela',2017,90,'hindi','india'),(4,'dangaal',2018,140,'hindi','india'),
+(5,'brahmashtra',2022,120,'hindi','india');
+
+select * from movie;
+
+insert into movie_direction
+values(1,5),(2,2),(3,3),(4,1),(5,4);
+
+select * from movie_direction;
+
+insert into movie_cast
+values(1,1,'spy'),(2,2,'romantic hero'),(3,4,'wrestler'),(4,5,'heroine'),(5,3,'heroine');
+
+select * from movie_cast;
+
+insert into reviewers
+values(1,'alpha'),(2,'beta'),(3,'gamma'),(4,'sonic'),(5,'supersonic');
+
+select * from reviewers;
+
+insert into rating
+values(2,3,3,3),(1,2,1,3),(3,5,3,4),(4,1,4,4),(5,2,2,3);
+
+select * from rating;
+
+show tables;
+
+insert into genres
+values(1,'action'),(2,'romantic'),(3,'sci-fi'),(4,'real story');
+
+insert into movie_genres
+values(5,3),(4,4),(3,2),(2,2),(1,1);
+
+select * from movie_genres;
+
+#we have already created a relation btn table by using foreign key now applying 
+#some join btn table to extract record from multiple table
+
+#first applying natural join btn ===>it return all the join table record in output
+#btn actor,movie,movie_cast===>the relation we can see one to many relation
+
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings from actor
+natural join movie_cast
+natural join movie
+natural join rating
+natural join movie_genres;
+
+#or by using cartesian join and cross join or cartesian product and cross it can also achieve
+
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor,movie_cast,movie,rating
+where actor.act_id=movie_cast.act_id 
+and (movie_cast.mov_id=movie.mov_id and movie.mov_id=rating.mov_id);
+
+
+#inner join btn 4 table actor,movie_cast,movie,rating
+#return all the matching records from all the 4 table 
+#on keyward represent we r joining equijoin of common column from all the 4 tables
+
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id;
+
+#now using inner join query  as a sub query to extract 
+#all the record who is playing the role of spy
+
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id;
+
+#now applying sub querry in sql after joining the table
+#above we have join the 4 table by using by using foreign key and making a relation
+#one to many btn table 
+
+#if i want to sort the record according to the act_id
+#by using order by
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id
+order by act_id;
+#by default sorting in ascending order
+
+#if i want to sort the table in descending order then
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id
+order by act_id desc;
+
+#show me those record 
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id
+where mov_year='2017';
+
+#using groupby concept with having
+select actor.act_id,actor.act_fname,actor.act_lname,movie_cast.role,movie.mov_title,
+movie.mov_year,movie.mov_lang,movie.mov_rel_country,rating.rev_stars,rating.num_o_ratings 
+from actor
+inner join movie_cast 
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie_cast.mov_id=movie.mov_id
+inner join rating
+on movie.mov_id=rating.mov_id
+where act_fname like 's%'
+group by act_fname
+having mov_year>'2014';
+
+#again joining all the table which showing one to many relation btn table
+#we r joining with help of foreign key
+
+#applying equijoin inner joining the tables
+select actor.act_id,actor.act_fname,director.dir_fname,movie_cast.role,
+movie.mov_title,movie.mov_year,genres.gen_title,reviewers.rev_name,
+rating.num_o_ratings from actor
+inner join movie_cast
+on actor.act_id=movie_cast.act_id
+inner join movie
+on movie.mov_id=movie_cast.mov_id
+inner join movie_direction
+on movie.mov_id=movie_direction.mov_id
+inner join director
+on director.dir_id=movie_direction.dir_id
+inner join movie_genres
+on movie_genres.mov_id=movie.mov_id
+inner join genres
+on genres.gen_id=movie_genres.gen_id
+inner join rating
+on rating.mov_id=movie.mov_id
+inner join reviewers
+on reviewers.rev_id=rating.rev_id
+order by act_id asc;
